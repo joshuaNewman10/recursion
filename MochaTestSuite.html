@@ -1,0 +1,87 @@
+  <html>
+<head>
+  <meta charset="utf-8">
+  <title>Mocha Tests</title>
+  <link rel="stylesheet"
+    href="http://nathansuniversity.com/css/mocha.css"/>
+  <script src=
+    "http://nathansuniversity.com/js/jquery-1.7.1.min.js">
+  </script>
+  <script src=
+    "http://nathansuniversity.com/js/chai.js">
+  </script>
+  <script src="http://nathansuniversity.com/js/mocha.js">
+  </script>
+  <script>mocha.setup('tdd')</script>
+  <script>
+    var assert = chai.assert;
+ </script>
+  <script>
+    $(function(){
+      mocha.run();
+    });
+
+
+    var stringifyJSON = function(o) {
+      if (typeof o === 'string') {
+        return '"' + o + '"';
+      } else if (o === undefined || o instanceof Function) {
+        return undefined;
+      } else if (o === null) {
+          return 'null';
+      } else if (typeof o !== 'object') {
+        return o.toString();
+      }
+      var arr = Array.isArray(o);
+      var strObj = arr ? '[' : '{';
+        
+      var keys = Object.keys(o);
+      for(var i=0; i<keys.length; i++) {
+        var currKey = keys[i];
+        var val;
+
+        val = stringifyJSON(o[currKey]);
+        strObj = arr ? strObj += val + ',' : strObj += '"' + currKey + '"' + ':' + val +',';
+        if (i===keys.length-1) strObj = strObj.slice(0,strObj.length-1);
+      }
+      return strObj += Array.isArray(o) ? ']' : '}';
+    };
+
+    suite('different types', function() {
+      test('number', function() {
+        assert.deepEqual(stringifyJSON(4), JSON.stringify(4));
+      });
+      test('string', function() {
+        assert.deepEqual(stringifyJSON('hi'), JSON.stringify('hi'));
+      });
+      test('bool', function(){
+        assert.deepEqual(stringifyJSON(true), JSON.stringify(true));
+      })
+      test('undefined', function() {
+        assert.deepEqual(stringifyJSON(undefined), JSON.stringify(undefined));
+      });
+      test('null', function() {
+        assert.deepEqual(stringifyJSON(null), JSON.stringify(null));
+      });
+      test('Empty Array', function() {
+        assert.deepEqual(stringifyJSON([]), JSON.stringify([]));
+      });
+      test('Empty Obj', function() {
+        assert.deepEqual(stringifyJSON({}), JSON.stringify({}));
+      });
+      test('One Dimensional Array', function() {
+        assert.deepEqual(stringifyJSON([0,1,2]), JSON.stringify([0,1,2]));
+      });
+      test('One Dimensional Object', function() {
+        assert.deepEqual(stringifyJSON({a:10,b:20}), JSON.stringify({a:10,b:20}));
+      });
+      test('functions', function() {
+        assert.deepEqual(stringifyJSON({'functions': function(){},'undefined': undefined}), JSON.stringify({'functions': function(){},'undefined': undefined}));
+      });
+    });
+  </script>
+</head>
+<body>
+  <div id="mocha"></div>
+</body>
+</html>
