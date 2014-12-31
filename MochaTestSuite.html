@@ -21,7 +21,31 @@
       mocha.run();
     });
 
+    
+var getElementsByClassName = function(name) {
+  var NodeList = {length:0};
+  var j = 0;
+  recurs(document.body);
+  function recurs(elem) { 
+    var classList = elem.className;
 
+    if(classList && classList.indexOf(name) > -1) {
+      NodeList[j] = elem;
+      j+=1;
+      NodeList.length +=1;
+    }
+    var children = elem.childNodes;
+    if (children.length === 0) {
+      return;
+    } else {
+      for(var i=0; i<children.length; i++) {
+        recurs(children[i]);
+      }
+    }
+  }
+  console.log(NodeList);
+  return Array.prototype.slice.apply(NodeList);
+};
     var stringifyJSON = function(o) {
       if (typeof o === 'string') {
         return '"' + o + '"';
@@ -37,17 +61,52 @@
         
       var keys = Object.keys(o);
       for(var i=0; i<keys.length; i++) {
+        
         var currKey = keys[i];
+        if(stringifyJSON(o[currKey]) === undefined) {
+          continue;
+        }
         var val;
 
         val = stringifyJSON(o[currKey]);
         strObj = arr ? strObj += val + ',' : strObj += '"' + currKey + '"' + ':' + val +',';
-        if (i===keys.length-1) strObj = strObj.slice(0,strObj.length-1);
+        if (i===keys.length-1) {
+          strObj = strObj.slice(0,strObj.length-1);
+        }
       }
       return strObj += Array.isArray(o) ? ']' : '}';
     };
+var htmlStrings = [
+  '<p class="otherClassName targetClassName"></p>',
+  '<p><p class="targetClassName"></p></p>',
+  '<p><p class="targetClassName"><p class="targetClassName"></p></p></p>',
+  '<p><p></p><p><p class="targetClassName"></p></p></p>',
+  '<p><p class="targetClassName"></p><p class="targetClassName"></p></p>',
+  '<p><div class="somediv"><div class="innerdiv"><span class="targetClassName">yay</span></div></div></p>'
+];
 
-    suite('different types', function() {
+var htmlStrings = [
+  '<p class="targetClassName"></p>',
+];
+
+suite('getElementsByClassName', function(){
+  test('should match the results of calling the built-in function', function(){
+    $('body').addClass('targetClassName');
+    htmlStrings.forEach(function(htmlString){
+      var $rootElement = $(htmlString);
+      $('body').append($rootElement);
+      var result = getElementsByClassName('targetClassName');
+      var expectedNodeList = document.getElementsByClassName('targetClassName');
+      var expectedArray = Array.prototype.slice.apply(expectedNodeList);
+      // console.log(expectedArray, expectedNodeList);
+
+      $rootElement.remove();
+    });
+    $('body').removeClass('targetClassName');
+  });
+
+});
+    suite('Stringify JSON', function() {
       test('number', function() {
         assert.deepEqual(stringifyJSON(4), JSON.stringify(4));
       });

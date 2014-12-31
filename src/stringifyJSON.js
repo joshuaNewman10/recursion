@@ -5,8 +5,8 @@
  var stringifyJSON = function(o) {
   if (typeof o === 'string') {
     return '"' + o + '"';
-  } else if (o === undefined) {
-    return o;
+  } else if (o === undefined || o instanceof Function) {
+    return undefined;
   } else if (o === null) {
       return 'null';
   } else if (typeof o !== 'object') {
@@ -17,12 +17,16 @@
     
   var keys = Object.keys(o);
   for(var i=0; i<keys.length; i++) {
+
     var currKey = keys[i];
+    if(stringifyJSON(o[currKey]) === undefined) {
+      continue;
+    }
     var val;
 
     val = stringifyJSON(o[currKey]);
     strObj = arr ? strObj += val + ',' : strObj += '"' + currKey + '"' + ':' + val +',';
-    if(i===keys.length-1) strObj = strObj.slice(0,strObj.length-1);
+    if (i===keys.length-1) strObj = strObj.slice(0,strObj.length-1);
   }
   return strObj += Array.isArray(o) ? ']' : '}';
 };
